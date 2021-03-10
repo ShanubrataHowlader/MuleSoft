@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<flow name="Errorflow1Flow" doc:id="3f5fc33e-e67d-4904-b16b-d5fa54a5363d" >
+		<http:listener doc:name="Listener" doc:id="6c6d96c5-a850-4920-a701-8d3fc66ed0d3" config-ref="createcashreserve-httpListenerConfig" path="/path"/>
+		<file:read doc:name="Read" doc:id="fb97944a-22c6-4222-8c52-8f09b4d15a36" path="Y:/sample.txt" />
+		<set-variable value="#[sizeOf(message.payload) as Number]" doc:name="Set Variable" doc:id="bb088ed6-f09e-443b-a87c-d9708d5fea18" variableName="new"/>
+		<logger level="INFO" doc:name="Logger" doc:id="edc60aa1-69a4-4e48-8c6b-c37d9d85fd42" message="#[vars.new]" />
+		<choice doc:name="Choice" doc:id="30d3cf59-f399-43bf-a4e0-70e44aa9a772" >
+			<when expression='#[vars.new &gt; 0]'>
+				<file:write doc:name="Write" doc:id="b8d25f56-ce41-4dde-b433-c6fd1123e681" path="Y:\Write\wrt.txt"/>
+				<logger level="INFO" doc:name="Logger" doc:id="a1bd65cb-0d63-42e7-adb1-e6fdbd743773" message="success"/>
+			</when>
+			<otherwise>
+				<flow-ref doc:name="Flow Reference" doc:id="4b4ef6a5-bd1d-4a4c-92cd-6fc73c2dfb21" name="Errorflow1Sub_Flow"/>
+			</otherwise>
+		</choice>
+	</flow>
+	<sub-flow name="Errorflow1Sub_Flow" doc:id="fba2f155-01f3-4667-9a42-2a1346738c9a" >
+		<raise-error doc:name="Raise error" doc:id="317976e9-5107-4bdc-bfed-97cf65dc784c" type='"CUSTOM: FILE_IS_EMPTY"' description="[error.description]"/>
+		<logger level="INFO" doc:name="Logger" doc:id="796a47d9-04df-4223-96bb-15b9f6863b83" message="#[error.description]"/>
+	</sub-flow>
+</mule>

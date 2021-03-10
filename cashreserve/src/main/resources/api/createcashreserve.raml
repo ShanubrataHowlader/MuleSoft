@@ -1,0 +1,185 @@
+#%RAML 1.0
+title: CreateCashReserve
+description: API to invoke Create Cash Reserve Service
+/getCash:
+  description: get cash details
+  post:
+    headers:
+      ServiceName:
+        type: string
+        required: false
+      OperationName:
+        type: string
+        required: true
+      PropositionSystem:
+        type: string
+        required: true
+      ConsumerIdentifier:
+        type: string
+        required: true
+    body:
+      application/json:
+        description: input body of the request
+        properties:
+          BaseSTPRequest:
+            type: object
+            properties:
+              ProcessName:
+                type: string
+                required: false
+              PayloadId: 
+                type: string
+                required: false
+              SenderId:
+                type: string
+                required: false
+              User:
+                type: string
+                required: false
+              UserName:
+                type: string
+                required: false
+              Role:
+                type: string
+                required: false
+              RequestParameter:
+                type: array
+                required: false
+                items:
+                  properties:
+                    RequestParameters:
+                      properties:
+                        ParamKey:
+                          type: string
+                          required: false
+                        ParamValue:
+                          type: string
+                          required: false
+              PartyTypeId:
+                type: integer
+                required: false
+              PartyId: 
+                type: integer
+                required: false
+              Attributes:
+                type: array
+                required: false  
+                items:
+                  properties:
+                    Attribute:
+                      properties:
+                        AttributeId:
+                          type: integer
+                          required: false
+                        ShortCode:
+                          type: string
+                          required: false
+                        AttributeValue:
+                          type: string
+                          required: false
+                        Description:
+                          type: string
+                          required: false
+              ExternalIdentifiers:
+                type: array
+                required: false
+                items:
+                  properties:
+                    ExternalIdentifier:
+                      properties:
+                        PartyTypeId:
+                          type: integer
+                          required: false
+                        PartyId:
+                          type: integer
+                          required: false
+                        ExternalSystem:
+                          type: string
+                          required: false
+                        ExternalReference:
+                          type: string
+                          required: false
+                        PartyExternalReferenceId:
+                          type: integer
+                          required: false
+              WebUserId:
+                type: integer
+                required: false
+              WebUserName:
+                type: string
+                required: false
+          InvestorAccountId:
+            type: integer
+          MasterCorrespondenceId:
+            type: integer
+            required: false
+          CashReservePurposeList:
+            type: array
+            required: false
+            items:
+              properties:
+                cashReservePurpose:
+                  properties:
+                    CashReserveType:
+                      type: string
+                    CashReserveAmount:
+                      type: integer
+    responses:
+      200:
+        description: successfull response
+        body:
+          application/json:
+            properties:
+              ProcessStatus: 
+                type: string
+              PayloadId:
+                type: string
+              MasterCorrespondenceId:
+                type: integer
+                required: false
+              CorrespondenceId:
+                type: integer
+                required: false
+            example:
+              {
+                "ProcessStatus": "I",
+                "PayloadId": "One",
+                "MasterCorrespondenceId": 2, 
+                "CorrespondenceId": 4
+              }
+      404:
+        body:
+          application/json:
+            type: object
+            properties:
+              ErrorCode: integer
+              ErrorMessage: string
+            example:
+              {
+                "ErrorCode" : 404,
+                "ErrorMessage": "Server not found"
+              }
+      400:
+        body:
+          application/json:
+            type: object
+            properties:
+              ErrorCode: integer
+              ErrorMessage: string
+            example:
+              {
+                "ErrorCode" : 400,
+                "ErrorMessage": "Internal error"
+              }
+      500:
+        body:
+          application/json:
+            type: object
+            properties:
+              ErrorCode: integer
+              ErrorMessage: string
+            example:
+              {
+                "ErrorCode" : 500,
+                "ErrorMessage": "Server Error"
+              }                               

@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:sockets="http://www.mulesoft.org/schema/mule/sockets" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/sockets http://www.mulesoft.org/schema/mule/sockets/current/mule-sockets.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+    <http:listener-config name="createcashreserve-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="8081" />
+    </http:listener-config>
+    <apikit:config name="createcashreserve-config" api="createcashreserve.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+	<flow name="createcashreserve-main">
+        <http:listener config-ref="createcashreserve-httpListenerConfig" path="/getCash">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="createcashreserve-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="createcashreserve-console">
+        <http:listener config-ref="createcashreserve-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="createcashreserve-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="post:\getCash:application\json:createcashreserve-config">
+		<flow-ref doc:name="Flow Reference" doc:id="03f667ed-1320-4147-a9a2-adc03b0d4417" name="Errorflow1Flow"/>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns envelope http://schemas.xmlsoap.org/soap/envelope/
+ns v1 http://www.aegon.co.uk/namespaces/schema/CreateCashReserve/v1
+---
+{
+	Envelope: {
+		Header: {
+			AEGONServiceContract: {
+				ServiceControlData: {
+					ServiceName: attributes.headers.ServiceName default " ",
+					OperationName: attributes.headers.OperationName,
+					ConsumerIdentifier: attributes.headers.ConsumerIdentifier,
+					PropositionSystem: attributes.headers.PropositionSystem
+				}
+			}
+		},
+		Body: {
+			CreateCashReserveRequest: {
+				RequestData: {
+					BaseSTPRequest: {
+						ProcessName: payload.BaseSTPRequest.ProcessName,
+						PayloadId: payload.BaseSTPRequest.PayloadId,
+						PartyTypeId: payload.BaseSTPRequest.PartyTypeId,
+						PartyId: payload.BaseSTPRequest.PartyId
+					},
+			RequestParameter: {
+ 				(payload.BaseSTPRequest.RequestParameter.*RequestParameters map {
+ 				 RequestParameters: {
+ 				 	ParamKey: $.ParamKey,
+ 				 	ParamValue: $.ParamValue
+					}
+						})
+					},
+			Attributes:{
+				(payload.BaseSTPRequest.Attributes.*Attribute map {
+				Attribute: {
+					AttributeId : $.AttributeId,
+					ShortCode: $.ShortCode
+			}
+			})
+			},
+			ExternalIdentifiers: {
+				(payload.BaseSTPRequest.ExternalIdentifiers.ExternalIdentifier map {
+				 ExternalIdentifier: {
+				 	PartyTypeId: $.PartyTypeId,
+				 	PartyId: $.PartyId,
+				 	ExternalSystem: $.ExternalSystem,
+				 	ExternalReference: $.ExternalReference,
+				 	PartyExternalReferenceId: $.PartyExternalReferenceId
+				 }	
+				})
+			},
+			WebUserId: payload.BaseSTPRequest.WebUserId,
+			WebUserName: payload.BaseSTPRequest.WebUserName,
+			InvestorAccountId: payload.MasterCorrespondenceId,
+			CashReservePurposeList : {
+				(payload.CashReservePurposeList.cashReservePurpose map {
+					cashReservePurpose: {
+						CashReserveType: $.CashReserveType,
+						CashReserveAmount: $.CashReserveAmount
+						}
+						})
+					}
+				}
+			}
+	}
+	
+	}
+	}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="d6deefe3-3885-46cd-9e59-c83420b5b5e3" message="#[payload]"/>
+		<http:request method="GET" doc:name="Request" doc:id="6b8da2dc-b5a2-4a53-ab92-b6464c8bd469" url="http://dummy.restapiexample.com/api/v1/employees"/>
+		<file:write doc:name="Write" doc:id="858191f1-7116-4cf3-bd47-484883678902" path="scsc"/>
+		<logger level="INFO" doc:name="Logger" doc:id="3f5f7df5-2288-4887-9461-1577147f88a7" message="after the payload            #[payload]"/>
+		<error-handler>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="9c0e6521-1ddb-461a-b1de-a6f65fea01c2" type="ANY">
+				<logger level="INFO" doc:name="Logger" doc:id="5ea9533e-9fb0-4e24-8cc5-5065865292a8" message="400: Internal Server"/>
+			</on-error-propagate>
+		</error-handler>
+    </flow>
+</mule>

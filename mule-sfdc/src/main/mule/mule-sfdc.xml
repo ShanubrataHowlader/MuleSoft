@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="68eb6864-ce5c-4437-88fe-897880894d7c" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="b95f65fe-2015-4851-bfef-25618787b4ba" >
+		<salesforce:basic-connection username="shanubrata.howlader@gmail.com" password="Sh@9ubrata" securityToken="q2CB69ELn8Vd9iTkGPWfJUL54" />
+	</salesforce:sfdc-config>
+	<flow name="mule-sfdcFlow" doc:id="b2c961fa-a120-48ff-9f9b-8c1bbee21fcf" >
+		<http:listener doc:name="Listener" doc:id="9e36d584-58f6-42d3-8bbd-12b305854f6c" config-ref="HTTP_Listener_config" path="/SFDC" allowedMethods="POST"/>
+		<ee:transform doc:name="Transform Message" doc:id="35cc88dd-9793-484a-a802-3b1b311d83b2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload map(item,index) ->{
+	Name: item.name,
+	BillingStreet: item.billingAddress,
+	BillingCity: item.billingCity,
+	BillingState: item.billingState,
+	BillingPostalCode: item.billingPostalCode,
+	BillingCountry: item.billingCountry
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:create doc:name="Create" doc:id="24e8b807-30fc-4bd0-af93-45169bf02dd4" config-ref="Salesforce_Config" type="Account"/>
+		<ee:transform doc:name="Transform Message" doc:id="514152b3-144f-4488-ae79-9dab20673b7b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="mule-sfdcFlow1" doc:id="3f3504d2-887f-4ce2-bdc0-1a6136216561" >
+		<http:listener doc:name="Listener" doc:id="cde0142f-b7c3-4aa5-9efd-bd5a6ce1cdd0" config-ref="HTTP_Listener_config" path="/upsert"/>
+		<ee:transform doc:name="Transform Message" doc:id="beb2f3d3-cc50-4d60-82b9-bcbccc1eafb1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload map (object, index)-> {
+	LastName: object.lastName,
+	FirstName: object.firstName,
+	Phone: object.mobile,
+	Email: object.email
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:upsert doc:name="Upsert" doc:id="5122b0d7-c428-4e89-a863-421c841e5f84" config-ref="Salesforce_Config" objectType="Contact" externalIdFieldName="Email"/>
+		<ee:transform doc:name="Transform Message" doc:id="ed512d8c-bd4a-4dc2-936b-6c55b860321e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

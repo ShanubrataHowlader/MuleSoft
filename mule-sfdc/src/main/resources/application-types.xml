@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="Create_account" format="json">
+      <types:shape format="weave" example="examples/test-2.json"><![CDATA[%dw 2.0
+
+type Create_account = Array<{|  name: String,   billingAddress: String,   billingCity: String,   billingCountry: String,   billingPostalCode: String,   billingState: String|}> {"example": "[{\\\"name\\\":\\\"Shanubrata Howlader\\\",\\\"billingAddress\\\":\\\"AEGON\\\",\\\"billingCity\\\":\\\"Kolkata\\\",\\\"billingCountry\\\":\\\"IN\\\",\\\"billingPostalCode\\\":\\\"700111\\\",\\\"billingState\\\":\\\"WB\\\"},{\\\"name\\\":\\\"Partha Roy\\\",\\\"billingAddress\\\":\\\"PWC\\\",\\\"billingCity\\\":\\\"Kolkata\\\",\\\"billingCountry\\\":\\\"IN\\\",\\\"billingPostalCode\\\":\\\"700111\\\",\\\"billingState\\\":\\\"WB\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="Contact_data" format="json">
+      <types:shape format="weave" example="examples/contact.json"><![CDATA[%dw 2.0
+
+type Contact_data = Array<{|  firstName: String,   lastName: String,   email: String,   mobile: String|}> {"example": "[{\\\"firstName\\\":\\\"Shanubrata\\\",\\\"lastName\\\":\\\"Howlader\\\",\\\"email\\\":\\\"asd12@abc.com\\\",\\\"mobile\\\":\\\"25874125\\\"},{\\\"firstName\\\":\\\"Partha\\\",\\\"lastName\\\":\\\"Roy\\\",\\\"email\\\":\\\"asd92@abc.com\\\",\\\"mobile\\\":\\\"25874158\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#35cc88dd-9793-484a-a802-3b1b311d83b2">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="Create_account"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#beb2f3d3-cc50-4d60-82b9-bcbccc1eafb1">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="Contact_data"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:java="http://www.mulesoft.org/schema/mule/java" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="7197bf85-e6e5-4bc1-97fb-820c1b377f7a" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="javaexampleFlow" doc:id="e1a35077-f5a6-4b12-8c7b-557b956b478c" >
+		<http:listener doc:name="Listener" doc:id="4e938a1f-5267-4af6-862a-443d1ce179b7" config-ref="HTTP_Listener_config" path="/java"/>
+		<java:invoke-static doc:name="Invoke static" doc:id="8b8c0702-776d-4f69-80fa-6f6277f1c3f3" method="AppendNmae(String)" class="com.example.AppendData">
+			<java:args ><![CDATA[#[{
+	Name: attributes.queryParams.Name
+}]]]></java:args>
+		</java:invoke-static>
+		<logger level="INFO" doc:name="Logger" doc:id="9b8225dd-b9d3-4cde-90f8-0304018f66df" message="#[payload]"/>
+	</flow>
+	<flow name="javaexampleFlow1" doc:id="f19daca0-577f-446c-b407-b43e07acc078" >
+		<http:listener doc:name="Listener" doc:id="5d989677-10ec-4080-8923-9a21750f4c64" config-ref="HTTP_Listener_config" path="/javaNonStatic"/>
+		<java:new doc:name="New" doc:id="2e6413dd-d998-4464-a302-afcfb06f37cd" class="com.example.AppendData" constructor="AppendData()" target="Inst"/>
+		<java:invoke doc:name="Invoke" doc:id="d0fb766f-bf05-4652-8b35-790828e4fa09" class="com.example.AppendData" method="AppendFullNmae(java.lang.String,java.lang.String)" instance="#[vars.Inst]">
+			<java:args ><![CDATA[#[{
+	fName: attributes.queryParams.fName,
+	lName: attributes.queryParams.lNmae
+}]]]></java:args>
+		</java:invoke>
+		<logger level="INFO" doc:name="Logger" doc:id="8180e0c8-f3e0-4e46-9913-6f8db5aeaa49" message="test " />
+	</flow>
+</mule>
